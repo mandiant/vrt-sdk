@@ -1,0 +1,14 @@
+{
+  "nist_mapping": {
+    "T1071.001": ["NIST:SI-1"],
+    "T1204.002": ["NIST:SI-2"],
+    "T1598.002": ["NIST:SI-3"],
+    "T1598.003": ["NIST:SI-3", "NIST:SI-4"]
+  },
+  "cwe_mapping": {
+    "T1071.001": ["FAKE-CWE-001"],
+    "T1204.002": ["FAKE-CWE-002"],
+    "T1598.002": ["FAKE-CWE-003"],
+    "T1598.003": ["FAKE-CWE-003", "FAKE-CWE-004"]
+  }
+}
