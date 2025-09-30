@@ -1547,9 +1547,8 @@ class Director:
             raise ValueError(
                 f"Missing required variable(s) for host action: {', '.join(missing_vars)}"
             )
-        # Add validated variables to payload - action_variables could be a list
-        # but it's not evident what the 0th entry would be used for
-        payload["action_variables"] = { 1: { action.id: user_variables } }
+        # Add validated variables to payload
+        payload["action_variables"] = {"1": { action.id: user_variables }}
 
     # If this action is an email action
     if action.action_type == "email":
