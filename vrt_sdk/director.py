@@ -1436,6 +1436,7 @@ class Director:
       destination_email_profile: EmailProfile | int = None,
       proxy: bool = False,
       job_name: str = "",
+      user_variables: dict[str, str] = None
   ) -> int:
     """Runs a single Action with the given settings.
 
@@ -1464,6 +1465,9 @@ class Director:
         picking the first available proxy.
       job_name: The name of the job. If not provided, will default to the format
         "{username} || {VID}:{Action name}".
+      user_variables: For Host CLI actions, any variable names and values set by 
+        the user. Does not default to anything, since different actions will have
+        different variable requirements.
 
     Returns:
       The id of the created job as an integer.
@@ -1521,16 +1525,30 @@ class Director:
 
       payload["target_node_id_1"] = target_node_id
 
-    # If this action is a Host CLI, but we don't have an action user profile
-    if action.action_type == "host_cli" and not action_user_profile:
-      raise NotImplementedError(
-          "Cannot run Host CLI Actions without specifying action user profile."
-      )
-    else:
-      if isinstance(action_user_profile, ActionUserProfile):
-        payload["action_user_profile_id"] = {"1": action_user_profile.aup_id}
+    # If this action is a Host CLI
+    if action.action_type == "host_cli":
+
+      # we must have an action user profile
+      if not action_user_profile:
+        raise NotImplementedError(
+            "Cannot run Host CLI Actions without specifying action user profile."
+        )
       else:
-        payload["action_user_profile_id"] = {"1": action_user_profile}
+        if isinstance(action_user_profile, ActionUserProfile):
+          payload["action_user_profile_id"] = {"1": action_user_profile.aup_id}
+        else:
+          payload["action_user_profile_id"] = {"1": action_user_profile}
+
+      # Validate user variables if required by the action
+      if action.user_variables:
+        user_variables = user_variables or {}
+        missing_vars = list(set(action.user_variables) - set(user_variables.keys()))
+        if missing_vars:
+            raise ValueError(
+                f"Missing required variable(s) for host action: {', '.join(missing_vars)}"
+            )
+        # Add validated variables to payload
+        payload["action_variables"] = {"1": { action.id: user_variables }}
 
     # If this action is an email action
     if action.action_type == "email":
